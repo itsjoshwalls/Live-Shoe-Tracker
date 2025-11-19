@@ -2,11 +2,10 @@
   "version": 2,
   "installCommand": "cd ../.. && pnpm install",
   "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/dist/server.js"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ],
   "regions": ["iad1"]

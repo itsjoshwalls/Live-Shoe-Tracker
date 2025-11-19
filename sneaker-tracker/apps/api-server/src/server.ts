@@ -14,6 +14,23 @@ import metricsRouter from './routes/metrics';
 import subscriptionsRouter from './routes/subscriptions';
 import { requestMetricsMiddleware } from './lib/metrics';
 import logger from './lib/logger';
+// Early diagnostics: summarize presence (not values) of critical env vars
+const requiredEnv = [
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'SUPABASE_ANON_KEY',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+];
+try {
+  const summary = requiredEnv.map(k => ({ key: k, present: !!process.env[k] })).reduce((acc, cur) => {
+    acc[cur.key] = cur.present;
+    return acc;
+  }, {} as Record<string, boolean>);
+  logger.info({ msg: 'Env presence summary', env: summary });
+} catch (e) {
+  // Fail silently if logging fails to avoid blocking startup
+}
 
 // Rate limiting middleware
 const limiter = rateLimit({
@@ -61,6 +78,11 @@ app.use('/api/health', healthRouter);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 
+// Fallback health route if upstream router fails (e.g. init error)
+app.get('/api/health/fallback', (req: Request, res: Response) => {
+  res.json({ status: 'ok', fallback: true, timestamp: new Date().toISOString() });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -77,9 +99,13 @@ app.use(errorHandler);
 
 // Export app for tests. Only start server when invoked directly.
 if (require.main === module) {
+  try {
     app.listen(PORT, () => {
-        logger.info(`API server is running on http://localhost:${PORT}`);
+      logger.info(`API server is running on http://localhost:${PORT}`);
     });
+  } catch (err) {
+    logger.error({ msg: 'Server startup failed', error: (err as Error).message });
+  }
 }
 
 export default app;
