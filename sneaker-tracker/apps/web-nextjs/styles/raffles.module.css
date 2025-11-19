@@ -1,0 +1,77 @@
+.raffles-page {
+  padding: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.raffles-title {
+  margin-bottom: 1rem;
+}
+
+.raffles-subtitle {
+  margin-bottom: 1.25rem;
+}
+
+.region-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.region-btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.region-btn.active {
+  background: #111;
+  color: #fff;
+}
+
+.region-btn:not(.active) {
+  background: #fff;
+  color: #111;
+}
+
+.raffles-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.raffles-table thead tr {
+  text-align: left;
+  border-bottom: 2px solid #222;
+}
+
+.raffles-table th,
+.raffles-table td {
+  padding: 0.5rem;
+}
+
+.raffles-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.raffles-table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.raffles-table td {
+  padding: 0.5rem;
+}
+
+.sneaker-name {
+  font-weight: 500;
+}
+
+.raffle-link {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.raffle-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,14 @@
+/* Global styles for Sneaker Tracker web app */
+:root {
+  --bg: #0b0c10;
+  --fg: #c5c6c7;
+  --primary: #66fcf1;
+}
+html, body, #__next { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--primary); text-decoration: none; }

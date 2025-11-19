@@ -1,0 +1,64 @@
+{
+  "targets": [
+    {
+      "id": "nike-snkrs",
+      "name": "Nike SNKRS",
+      "url": "https://www.nike.com/launch/"
+    },
+    {
+      "id": "kith",
+      "name": "Kith",
+      "url": "https://kith.com/collections/men-sneakers"
+    },
+    {
+      "id": "footlocker",
+      "name": "Foot Locker",
+      "url": "https://www.footlocker.com/product/"
+    },
+    {
+      "id": "finishline",
+      "name": "Finish Line",
+      "url": "https://www.finishline.com/store/"
+    },
+    {
+      "id": "champs",
+      "name": "Champs Sports",
+      "url": "https://www.champssports.com/"
+    },
+    {
+      "id": "jdsports-us",
+      "name": "JD Sports USA",
+      "url": "https://www.jdsports.com/us/product/launches/"
+    },
+    {
+      "id": "jdsports-uk",
+      "name": "JD Sports UK",
+      "url": "https://www.jdsports.co.uk/product/launches/"
+    },
+    {
+      "id": "footaction",
+      "name": "Footaction",
+      "url": "https://www.footaction.com/category/mens-release-calendar.html"
+    },
+    {
+      "id": "eastbay",
+      "name": "Eastbay",
+      "url": "https://www.eastbay.com/category/mens-release-calendar.html"
+    },
+    {
+      "id": "sneakersnstuff",
+      "name": "Sneakersnstuff",
+      "url": "https://www.sneakersnstuff.com/en/product/releases"
+    },
+    {
+      "id": "size",
+      "name": "Size?",
+      "url": "https://www.size.co.uk/launches/"
+    },
+    {
+      "id": "offspring",
+      "name": "Offspring",
+      "url": "https://www.offspring.co.uk/view/category/offspring_catalog/launches.htm"
+    }
+  ]
+}

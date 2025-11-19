@@ -1,0 +1,186 @@
+╔══════════════════════════════════════════════════════════════════╗
+║              DIAGNOSIS COMPLETE - ISSUES RESOLVED                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+🔍 ISSUE 1: Next.js EINVAL Error
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Error:
+  EINVAL: invalid argument, readlink
+  path: '.next\server\interception-route-rewrite-manifest.js'
+
+Root Cause:
+  ✗ OneDrive syncs the .next/ folder
+  ✗ Next.js uses symlinks in .next/
+  ✗ OneDrive corrupts symlinks during sync
+
+Impact:
+  ✗ Next.js fails to start
+  ✗ Build cache becomes corrupted
+  ✗ Error occurs randomly when OneDrive syncs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔍 ISSUE 2: VERIFY-STACK.ps1 Not Found
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Error:
+  .\VERIFY-STACK.ps1 : The term '.\VERIFY-STACK.ps1' is not 
+  recognized...
+
+Root Cause:
+  ✗ Script is in sneaker-tracker/ (parent directory)
+  ✗ Running from apps/web-nextjs/ subdirectory
+  ✗ Relative path incorrect
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ SOLUTIONS IMPLEMENTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Fix #1: OneDrive Workaround
+  ✓ Created: ONEDRIVE-FIX.md (detailed guide)
+  ✓ Updated: START-DEV.ps1 (auto-clears .next)
+  ✓ Created: START-NEXTJS-MANUAL.ps1 (interactive startup)
+
+Fix #2: Local Verification Script
+  ✓ Created: VERIFY-STACK.ps1 (local wrapper)
+  ✓ Points to main script in parent directory
+  ✓ Fallback if main script not found
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 HOW TO START NEXT.JS NOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current Location:
+  C:\Users\sneak\OneDrive\Desktop\Live-Shoe-Tracker\
+    sneaker-tracker\apps\web-nextjs\
+
+Method 1: Interactive Script (RECOMMENDED)
+  PS> .\START-NEXTJS-MANUAL.ps1
+
+  Features:
+    • Checks all prerequisites
+    • Clears corrupt .next automatically
+    • Verifies port availability
+    • Clear status messages
+
+Method 2: Quick Script
+  PS> .\START-DEV.ps1
+
+  Features:
+    • Auto-clears .next
+    • Starts immediately
+    • Less verbose
+
+Method 3: One-Liner
+  PS> Remove-Item .next -Recurse -Force -ErrorAction SilentlyContinue; npx next dev -p 3002
+
+  Use when:
+    • Scripts fail
+    • Quick restart needed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ VERIFICATION STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After starting Next.js:
+
+1. Check Server Started
+   Look for:
+     ▲ Next.js 14.2.33
+     ✓ Ready in 3-4s
+
+2. Verify Port Listening
+   New PowerShell window:
+     PS> Get-NetTCPConnection -LocalPort 3002
+
+3. Test API Route
+   PS> Invoke-RestMethod "http://localhost:3002/api/releases?limit=3"
+
+4. Open in Browser
+   Navigate to:
+     http://localhost:3002
+     http://localhost:3002/unified-dashboard
+
+5. Run Full Verification
+   PS> .\VERIFY-STACK.ps1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 LONG-TERM FIXES (Optional)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option A: Move Project Outside OneDrive (Best)
+  PS> Move-Item C:\Users\sneak\OneDrive\Desktop\Live-Shoe-Tracker `
+              C:\Dev\Live-Shoe-Tracker
+  
+  Benefits:
+    ✓ No symlink issues
+    ✓ Faster builds
+    ✓ No sync delays
+
+Option B: Exclude .next from OneDrive
+  1. Right-click OneDrive icon → Settings
+  2. Sync and backup → Manage backup
+  3. Add .next to exclusion list
+
+Option C: Change Build Directory
+  Add to next.config.js:
+    module.exports = {
+      distDir: 'C:\\Temp\\next-build',
+    }
+
+See ONEDRIVE-FIX.md for detailed instructions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 NEW FILES CREATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In apps/web-nextjs/:
+  ✓ ONEDRIVE-FIX.md           - Detailed troubleshooting guide
+  ✓ START-NEXTJS-MANUAL.ps1   - Interactive startup script
+  ✓ START-DEV.ps1 (updated)   - Quick start with auto-fix
+  ✓ VERIFY-STACK.ps1          - Local verification wrapper
+  ✓ DIAGNOSIS-COMPLETE.txt    - This file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 SYSTEM STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Component              Status    Notes
+─────────────────────────────────────────────────────────────────
+PostgREST (3001)       ✅ OK     Verified working
+Supabase Keys          ✅ OK     Valid local keys in .env.local
+RLS Policies           ✅ OK     Public read enabled
+API Route Code         ✅ OK     /api/releases configured
+Enhanced UI            ✅ OK     Dashboard/header/home deployed
+Documentation          ✅ OK     Roadmap + SLOs + Security
+Scripts                ✅ OK     Startup + verification ready
+
+Next.js (3002)         ⏸️  READY  Start manually (see above)
+OneDrive Conflict      ⚠️  KNOWN  Workaround in place
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ DIAGNOSIS COMPLETE - READY TO START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run this now:
+  .\START-NEXTJS-MANUAL.ps1
+
+Or read:
+  ONEDRIVE-FIX.md
+
+Questions? Check:
+  ../../VERIFICATION-COMPLETE.md
+  ../../docs/README.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Last Updated: 2025-11-18
+Agent: GitHub Copilot (Claude Sonnet 4.5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

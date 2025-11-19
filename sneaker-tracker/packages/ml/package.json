@@ -1,0 +1,17 @@
+{
+  "name": "@sneaker-tracker/ml",
+  "version": "1.0.0",
+  "description": "ML demand forecasting for sneaker releases",
+  "main": "demand-forecasting.py",
+  "scripts": {
+    "forecast": "python demand-forecasting.py"
+  },
+  "keywords": [
+    "ml",
+    "forecasting",
+    "demand-prediction",
+    "sneakers"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,29 @@
+{
+  "targets": [
+    {
+      "id": "nike-snkrs",
+      "name": "Nike SNKRS",
+      "url": "https://www.nike.com/launch/"
+    },
+    {
+      "id": "kith",
+      "name": "Kith",
+      "url": "https://kith.com/collections/men-sneakers"
+    },
+    {
+      "id": "footlocker",
+      "name": "Foot Locker",
+      "url": "https://www.footlocker.com/product/"
+    },
+    {
+      "id": "finishline",
+      "name": "Finish Line",
+      "url": "https://www.finishline.com/store/"
+    },
+    {
+      "id": "champs",
+      "name": "Champs Sports",
+      "url": "https://www.champssports.com/"
+    }
+  ]
+}

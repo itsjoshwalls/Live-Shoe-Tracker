@@ -1,0 +1,109 @@
+name: Scraper Pipeline
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:     # Manual trigger in GitHub UI
+    inputs:
+      run_mode:
+        description: 'Run mode'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - dry-run
+          - retailers-only
+          - releases-only
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: scrapers/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: scrapers
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      
+      - name: Run full pipeline
+        if: github.event.inputs.run_mode == 'full' || github.event.inputs.run_mode == ''
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run pipeline
+      
+      - name: Run dry-run pipeline
+        if: github.event.inputs.run_mode == 'dry-run'
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run pipeline:dry-run
+      
+      - name: Run retailers only
+        if: github.event.inputs.run_mode == 'retailers-only'
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RUN_SOLERETRIEVER: false
+          RUN_NIKE_SNKRS: false
+          RUN_ADIDAS_CONFIRMED: false
+        run: npm run pipeline
+      
+      - name: Run releases only
+        if: github.event.inputs.run_mode == 'releases-only'
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RUN_RETAILER_CRAWLER: false
+          RUN_SOLELINKS: false
+        run: npm run pipeline
+      
+      - name: Upload CSV artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-outputs-${{ github.run_number }}
+          path: |
+            scrapers/output/*.csv
+            scrapers/output/*.json
+          retention-days: 30
+      
+      - name: Upload cache
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-cache-${{ github.run_number }}
+          path: scrapers/cache/*.json
+          retention-days: 7
+      
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Scraper Pipeline Failed - Run #${context.runNumber}`,
+              body: `The scraper pipeline failed. Check the [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`,
+              labels: ['automated', 'scraper', 'failure']
+            })

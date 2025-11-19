@@ -1,0 +1,140 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18.x'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test-frontend:
+    name: Test Frontend (Next.js)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/web-nextjs/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: apps/web-nextjs
+        run: npm ci
+      
+      - name: Lint
+        working-directory: apps/web-nextjs
+        run: npm run lint
+      
+      - name: Build
+        working-directory: apps/web-nextjs
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_FIREBASE_CONFIG: ${{ secrets.FIREBASE_CLIENT_CONFIG }}
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+
+  test-api:
+    name: Test API Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/api-server/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: apps/api-server
+        run: npm ci
+      
+      - name: Run tests
+        working-directory: apps/api-server
+        run: npm test
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+  test-scrapers:
+    name: Test Scrapers
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Python dependencies
+        working-directory: packages/scrapers/python
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Test news aggregator
+        working-directory: packages/scrapers/python
+        run: python news_aggregator.py --limit 5 --dry-run
+
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test-frontend, test-api, test-scrapers]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push raffles scraper
+        uses: docker/build-push-action@v4
+        with:
+          context: ./scrapers/raffles
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/shoe-tracker-raffles:latest
+      
+      - name: Build and push news aggregator
+        uses: docker/build-push-action@v4
+        with:
+          context: ./packages/scrapers/python
+          file: ./packages/scrapers/python/Dockerfile.news
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/shoe-tracker-news:latest
+
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test-frontend]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: apps/web-nextjs
+          vercel-args: '--prod'

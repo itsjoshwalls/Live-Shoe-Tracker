@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Releases collection: read for authenticated users, write for admins only
+    // Used by: dashboard.tsx, analytics.tsx
+    match /releases/{releaseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Retailers collection: read for authenticated users, write for admins only
+    // Used by: analytics.tsx
+    match /retailers/{retailerId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Users collection: users can read/update their own profile, admins can read all
+    // Used by: analytics.tsx (admin view), AuthProvider
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isAdmin();
+    }
+
+    // User alerts: users manage their own, admins can view all
+    // Used by: analytics.tsx
+    match /user_alerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Mileage tracking (sneakers_canonical or sneakers): 
+    // authenticated users can read and increment their own mileage
+    // Used by: mileage.tsx
+    match /sneakers_canonical/{sneakerId} {
+      allow read: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        // Allow incremental updates to mileage field only
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mileage']);
+      allow create, delete: if isAdmin();
+    }
+
+    match /sneakers/{sneakerId} {
+      allow read: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mileage']);
+      allow create, delete: if isAdmin();
+    }
+
+    // Legacy/backup collections (read-only for authenticated users)
+    match /sneakers_raw/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Default: deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

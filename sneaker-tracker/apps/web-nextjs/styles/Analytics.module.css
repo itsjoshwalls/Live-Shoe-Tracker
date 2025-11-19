@@ -1,0 +1,163 @@
+/*
+ *   Copyright (c) 2025 
+ *   All rights reserved.
+ */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.metricCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.metricCardHighlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.metricValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.chartContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.barItem {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.barLabel {
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.barWrapper {
+  position: relative;
+  background: #f3f4f6;
+  border-radius: 4px;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 2rem;
+}
+
+/* Discrete width utility classes to avoid inline styles */
+.w0{width:0%}
+.w5{width:5%}
+.w10{width:10%}
+.w15{width:15%}
+.w20{width:20%}
+.w25{width:25%}
+.w30{width:30%}
+.w35{width:35%}
+.w40{width:40%}
+.w45{width:45%}
+.w50{width:50%}
+.w55{width:55%}
+.w60{width:60%}
+.w65{width:65%}
+.w70{width:70%}
+.w75{width:75%}
+.w80{width:80%}
+.w85{width:85%}
+.w90{width:90%}
+.w95{width:95%}
+.w100{width:100%}
+
+.barValue {
+  position: absolute;
+  right: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.tableWrapper { overflow-x: auto; }
+
+.insightsTable { width: 100%; border-collapse: collapse; }
+.insightsTable th {
+  text-align: left;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.insightsTable td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; }
+.insightsTable tbody tr:hover { background: #f9fafb; }
+.activeCount { color: #10b981; font-weight: 600; }
+
+.adminNote {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 1rem;
+  color: #1e40af;
+  margin-top: 2rem;
+}
+
+/* Bar color variants */
+.statusLive { background: #10b981; }
+.statusUpcoming { background: #3b82f6; }
+.statusSoldOut { background: #ef4444; }
+.statusRaffle { background: #f59e0b; }
+.statusDefault { background: #6b7280; }
+.brandBar { background: #3b82f6; }
+.retailerBar { background: #10b981; }
+
+.error { color: #ef4444; padding: 2rem; }

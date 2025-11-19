@@ -1,0 +1,22 @@
+{
+  "name": "live-shoe-tracker-root",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Root helper package.json with workspace installer scripts for a multi-project repo.",
+  "scripts": {
+    "install:all": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\\install-all.ps1",
+    "install:shoe-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location shoe-tracker; npm install\"",
+    "install:live-shoe-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location live-shoe-tracker; npm install\"",
+    "install:sneaker-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location sneaker-tracker; if (Get-Command pnpm -ErrorAction SilentlyContinue) { pnpm install } else { npm install }\"",
+    "dev:all": "docker-compose -f sneaker-tracker/infra/docker-compose.yml up --build",
+    "down:all": "docker-compose -f sneaker-tracker/infra/docker-compose.yml down",
+    "scrapers:monitor": "pnpm -C sneaker-tracker/packages/scrapers run monitor",
+    "start:everything": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/start-everything.ps1"
+  },
+  "engines": {
+    "node": ">=18 <25"
+  },
+  "dependencies": {
+    "firebase": "^12.5.0"
+  }
+}

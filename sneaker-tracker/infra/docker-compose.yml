@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Web Application (Next.js)
+  web:
+    build:
+      context: ../apps/web-nextjs
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_FIREBASE_CONFIG=${FIREBASE_CONFIG}
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
+  # API Server (Express/TypeScript)
+  api:
+    build:
+      context: ../apps/api-server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - FIREBASE_SERVICE_ACCOUNT=${FIREBASE_SERVICE_ACCOUNT}
+      - PORT=4000
+    volumes:
+      - ../apps/api-server/src:/app/src
+      - ../apps/api-server/logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
+  # Optional: Local PostgreSQL (if not using Supabase cloud)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-postgres}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+  #     - POSTGRES_DB=${POSTGRES_DB:-sneaker_tracker}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - shoe-tracker-network
+
+
+  # Scraper Services
+  raffles-scraper:
+    build:
+      context: ../scrapers/raffles
+      dockerfile: Dockerfile
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SCRAPE_INTERVAL=${RAFFLES_SCRAPE_INTERVAL:-600}
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  news-aggregator:
+    build:
+      context: ../packages/scrapers/python
+      dockerfile: Dockerfile.news
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SCRAPE_INTERVAL=${NEWS_SCRAPE_INTERVAL:-1800}
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  shopify-scraper:
+    build:
+      context: ../scrapers/shopify
+      dockerfile: Dockerfile
+    environment:
+      - FIREBASE_SERVICE_ACCOUNT=${FIREBASE_SERVICE_ACCOUNT}
+      - SCRAPE_INTERVAL=${SHOPIFY_SCRAPE_INTERVAL:-300}
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  shoe-tracker-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:

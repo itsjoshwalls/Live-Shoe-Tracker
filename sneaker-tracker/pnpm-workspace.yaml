@@ -1,0 +1,11 @@
+packages:
+  - apps/web-nextjs
+  - apps/desktop-electron
+  - apps/api-server
+  - packages/supabase-migrations
+  - packages/ml
+  - packages/scrapers
+  - packages/firebase-functions
+  - region-data
+  - docs
+  - tests

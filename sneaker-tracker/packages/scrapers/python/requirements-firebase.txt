@@ -1,0 +1,21 @@
+# Firebase & Analytics Requirements
+# Install with: pip install -r requirements-firebase.txt
+
+# Firebase Admin SDK for Firestore
+firebase-admin>=6.2.0
+
+# Google Analytics Data API (optional - for reading GA4 data)
+google-analytics-data>=0.17.0
+
+# Existing scraper dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.3
+playwright>=1.40.0
+python-dotenv>=1.0.0
+urllib3>=2.0.0
+python-dateutil>=2.8.2
+
+# Database (keep for migration script)
+psycopg2-binary>=2.9.9
+supabase>=2.0.0

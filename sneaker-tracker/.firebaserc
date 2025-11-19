@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "live-sneaker-release-tra-df5a4",
+    "staging": "live-shoe-tracker"
+  }
+}

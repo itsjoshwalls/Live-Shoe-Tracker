@@ -1,0 +1,51 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: |
+          cd apps/web-nextjs
+          npm install
+          cd ../../apps/api-server
+          npm install
+
+      - name: Run tests
+        run: |
+          cd apps/web-nextjs
+          npm test
+          cd ../../apps/api-server
+          npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Vercel
+        run: |
+          cd apps/web-nextjs
+          npm run build
+          npm run export
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --scope your-vercel-scope --confirm

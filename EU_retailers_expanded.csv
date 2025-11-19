@@ -1,0 +1,19 @@
+name,url,tier,type,region,region_group,notes,verified,resale_market,has_raffles,raffle_url_pattern,api_endpoint,contact_email,phone,country_code,address,timezone,last_checked,source
+END. (UK),https://www.endclothing.com,8,boutique,EU,EU,Premium retailer (UK/EU),True,False,True,https://www.endclothing.com/raffles,https://api.endclothing.com,customerservice@endclothing.com,,GB,"Leeds, UK (HQ)",Europe/London,,boutique
+Footpatrol,https://www.footpatrol.com,8,boutique,EU,EU,London boutique,True,False,True,https://www.footpatrol.com/raffles,https://api.footpatrol.com,info@footpatrol.com,,GB,"London, UK",Europe/London,,boutique
+Sneakersnstuff (SNS),https://www.sneakersnstuff.com,8,boutique,EU,EU,SNS EU sites (Stockholm/UK/Germany),True,False,True,https://www.sneakersnstuff.com/*/raffle,https://api.sneakersnstuff.com,info@sneakersnstuff.com,,SE,"Stockholm, Sweden",Europe/Stockholm,,boutique
+Foot Locker EU,https://www.footlocker.eu,7,chain,EU,EU,Foot Locker EU site,True,False,True,https://www.footlocker.eu/raffles,https://api.footlocker.eu,help@footlocker.eu,,EU,"Warsaw, Poland (operations)",Europe/Warsaw,,chain
+JD Sports (UK),https://www.jdsports.com,7,chain,EU,EU,Large retailer in UK/EU,True,False,False,,,customerservice@jdsports.com,,GB,"Bury, UK",Europe/London,,chain
+Klekt,https://www.klekt.com,6,resale,EU,EU,European resale marketplace,True,True,False,https://www.klekt.com/raffle,https://api.klekt.com,help@klekt.com,,DE,"Berlin, Germany",Europe/Berlin,,resale
+Adidas EU (Confirmed),https://www.adidas.co.uk/confirmed,9,brand_official,EU,EU,Adidas Confirmed EU/UK,True,False,True,https://www.adidas.co.uk/confirmed/*,https://api.adidas.com/confirmed,support@adidas.co.uk,,GB,"Herzogenaurach, Germany",Europe/Berlin,,brand_site
+Nike EU,https://www.nike.com/gb,9,brand_official,EU,EU,Nike EU site & SNKRS region,True,False,True,https://www.nike.com/gb/launch/*,https://api.nike.com/launch,help@nike.com,,GB,Beaverton (global) / EU operations,Europe/London,,brand_site
+Solebox (DE),https://www.solebox.com,7,boutique,EU,EU,German boutique,True,False,True,https://www.solebox.com/raffles,https://api.solebox.com,info@solebox.com,,DE,"Berlin, Germany",Europe/Berlin,,boutique
+Offspring,https://www.offspring.co.uk,8,boutique,EU,EU,UK sneaker boutique,True,False,True,https://www.offspring.co.uk/raffles,https://api.offspring.co.uk,customerservice@offspring.co.uk,,GB,"London, UK",Europe/London,,boutique
+Blue Tomato,https://www.blue-tomato.com,5,skate_online,EU,EU,Action sports retailer with skate,True,False,False,,,info@blue-tomato.com,,AT,"Graz, Austria",Europe/Vienna,,skate
+SkateHut,https://www.skatehut.co.uk,5,skate_online,EU,EU,UK skate retailer,True,False,False,,,help@skatehut.co.uk,,GB,UK,Europe/London,,skate
+Sole Retriever (aggregator),https://www.soleretriever.com,5,aggregator,EU,EU,Retailer and release calendar aggregator,True,False,False,,,info@soleretriever.com,,US,US (online),America/New_York,,aggregator
+Sneakersnstuff (UK),https://www.sneakersnstuff.com/en,8,boutique,EU,EU,SNS UK portal,True,False,True,https://www.sneakersnstuff.com/en/raffle,https://api.sneakersnstuff.com,info@sneakersnstuff.com,,GB,"London, UK",Europe/London,,boutique
+Laced (UK resale),https://www.laced.co.uk,6,resale,EU,EU,UK resale marketplace,True,True,False,,,hello@laced.co.uk,,GB,"London, UK",Europe/London,,resale
+Footshop (CZ),https://www.footshop.eu,6,boutique,EU,EU,Central European boutique,True,False,True,https://www.footshop.eu/raffle,https://api.footshop.eu,info@footshop.eu,,CZ,"Prague, Czech Republic",Europe/Prague,,boutique
+BSTN (DE),https://www.bstn.com,7,boutique,EU,EU,German boutique,True,False,True,,,info@bstn.com,,DE,"Munich, Germany",Europe/Berlin,,boutique
+Footpatrol (US portal),https://www.footpatrol.com/us,8,boutique,EU,EU,Footpatrol international portal,True,False,True,https://www.footpatrol.com/raffle,https://api.footpatrol.com,info@footpatrol.com,,US,"London, UK",Europe/London,,boutique

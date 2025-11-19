@@ -1,0 +1,85 @@
+{
+  "query": "Air Jordan 1 Chicago",
+  "timestamp": "2025-11-18T12:16:33.469Z",
+  "count": 3,
+  "products": [
+    {
+      "lowestResellPrice": {
+        "stockX": 135,
+        "goat": 130,
+        "flightClub": 145
+      },
+      "imageLinks": [],
+      "_id": "691c63a043e7d2b0ccd86135",
+      "shoeName": "Jordan 1 Retro Low OG Chicago (2025)",
+      "brand": "Jordan",
+      "silhoutte": "Jordan 1 Retro Low OG",
+      "styleID": "HQ6998-600",
+      "make": "Jordan 1 Retro Low OG",
+      "colorway": "Varsity Red/Black/Summit White",
+      "retailPrice": 145,
+      "thumbnail": "https://images.stockx.com/images/Air-Jordan-1-Retro-Low-OG-Chicago-2025-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&trim=color&q=90&dpr=2&updated_at=1761691081",
+      "releaseDate": "2025-11-15",
+      "description": "Honoring the team Michael Jordan brought glory to, the 2025 version of the Air Jordan 1 Retro Low OG 'Chicago' brings back a traditional rubber cupsole with white sidewalls and a red rubber outsole. The white, all-leather upper tooled with red forefoot and heel overlays. A black Swoosh matches the knit collar lining and the debossed Wings logo decorating the red leather back tab. A Nike Air tag adorns the tongue for a final touch.",
+      "urlKey": "air-jordan-1-retro-low-og-chicago-2025",
+      "resellLinks": {
+        "stockX": "https://stockx.com/air-jordan-1-retro-low-og-chicago-2025",
+        "goat": "http://www.goat.com/sneakers/air-jordan-1-retro-low-og-chicago-2025-hq6998-600",
+        "flightClub": "https://www.flightclub.com/air-jordan-1-retro-low-og-chicago-2025-hq6998-600"
+      },
+      "goatProductId": 1585268
+    },
+    {
+      "lowestResellPrice": {
+        "stockX": 189,
+        "flightClub": 187,
+        "goat": 186
+      },
+      "imageLinks": [],
+      "_id": "691c63a043e7d2b0ccd86136",
+      "shoeName": "Jordan 1 Retro High OG Chicago Lost and Found",
+      "brand": "Jordan",
+      "silhoutte": "Jordan 1 Retro High OG",
+      "styleID": "DZ5485-612",
+      "make": "Jordan 1 Retro High OG",
+      "colorway": "Varsity Red/Black-Sail-Muslin",
+      "retailPrice": 180,
+      "thumbnail": "https://images.stockx.com/images/Air-Jordan-1-Retro-High-OG-Chicago-Reimagined-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&trim=color&q=90&dpr=2&updated_at=1738193358",
+      "releaseDate": "2022-11-19",
+      "description": "The Air Jordan 1 Retro High OG 'Chicago Lost & Found' brings back the famous 'Chicago' colorway with new storytelling elements. Featuring the OG high-cut shape, the leather upper features a white base with Varsity Red overlays and a black Swoosh and Wings logo. Cracked black leather on the padded collar gives it a vintage look, along with a pre-yellowed midsole. The packaging also tells the 'Lost & Found' story, with a damaged-looking box plastered with sale stickers showcasing a different colored lid. A receipt is also included, alluding to finding this vintage gem tucked away in an attic or storage space.",
+      "urlKey": "air-jordan-1-retro-high-og-chicago-reimagined-lost-and-found",
+      "resellLinks": {
+        "stockX": "https://stockx.com/air-jordan-1-retro-high-og-chicago-reimagined-lost-and-found",
+        "flightClub": "https://www.flightclub.com/air-jordan-1-retro-high-og-dz5485-612",
+        "goat": "http://www.goat.com/sneakers/air-jordan-1-retro-high-og-dz5485-612"
+      },
+      "goatProductId": 920714
+    },
+    {
+      "lowestResellPrice": {
+        "stockX": 83,
+        "flightClub": 90,
+        "goat": 79
+      },
+      "imageLinks": [],
+      "_id": "691c63a043e7d2b0ccd86137",
+      "shoeName": "Jordan 1 Retro Low OG Chicago (2025) (GS)",
+      "brand": "Jordan",
+      "silhoutte": "Jordan 1 Retro Low OG",
+      "styleID": "HQ6999-600",
+      "make": "Jordan 1 Retro Low OG",
+      "colorway": "Varsity Red/Black/Summit White",
+      "retailPrice": 120,
+      "thumbnail": "https://images.stockx.com/images/air-jordan-1-retro-low-og-chicago-2025-gs.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&trim=color&q=90&dpr=2&updated_at=1762213298",
+      "releaseDate": "2025-11-15",
+      "description": "",
+      "urlKey": "air-jordan-1-retro-low-og-chicago-2025-gs",
+      "resellLinks": {
+        "stockX": "https://stockx.com/air-jordan-1-retro-low-og-chicago-2025-gs",
+        "flightClub": "https://www.flightclub.com/air-jordan-1-retro-low-og-gs-chicago-2025-hq6999-600",
+        "goat": "http://www.goat.com/sneakers/air-jordan-1-retro-low-og-gs-chicago-2025-hq6999-600"
+      },
+      "goatProductId": 1686258
+    }
+  ]
+}

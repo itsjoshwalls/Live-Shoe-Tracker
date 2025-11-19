@@ -1,0 +1,23 @@
+{
+  "name": "sneaker-tracker-desktop",
+  "version": "1.0.0",
+  "description": "Electron application for tracking sneaker releases",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "electron .",
+    "build": "tsc",
+    "package": "electron-builder"
+  },
+  "dependencies": {
+    "electron": "^27.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "electron-builder": "^24.6.4"
+  },
+  "homepage": "./",
+  "author": "Your Name",
+  "license": "MIT"
+}

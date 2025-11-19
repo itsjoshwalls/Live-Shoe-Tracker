@@ -1,0 +1,25 @@
+{
+  "name": "sneaker-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:all": "concurrently \"pnpm --filter ./apps/web-nextjs run dev\" \"pnpm --filter ./apps/api-server run dev\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "concurrently": "^8.0.0",
+    "cross-env": "^10.1.0",
+    "typescript": "latest"
+  }
+}

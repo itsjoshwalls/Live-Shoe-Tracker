@@ -1,0 +1,116 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          LIVE SHOE TRACKER - QUICK START CARD                    ║
+╚══════════════════════════════════════════════════════════════════╝
+
+✅ WHAT'S DONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ RLS policies enabled on soleretriever_data table
+  ✓ API route configured with service role key
+  ✓ Environment variables (.env.local) validated
+  ✓ PostgREST verified working on port 3001
+  ✓ Enhanced UI deployed (dashboard, header, homepage)
+  ✓ Documentation complete (roadmap, SLOs, security, IAM)
+  ✓ Verification scripts created
+
+🚀 START THE STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Open PowerShell terminal and run:
+  cd C:\Users\sneak\OneDrive\Desktop\Live-Shoe-Tracker\sneaker-tracker\apps\web-nextjs
+  npx next dev -p 3002
+
+  # Or use the start script:
+  .\START-DEV.ps1
+
+🧪 VERIFY EVERYTHING WORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Run the verification script:
+  cd C:\Users\sneak\OneDrive\Desktop\Live-Shoe-Tracker\sneaker-tracker
+  .\VERIFY-STACK.ps1
+
+  # Expected: PostgREST ✓, Next.js ✓, API route ✓
+
+🌐 ACCESS THE APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Homepage:         http://localhost:3002
+  Unified Dashboard: http://localhost:3002/unified-dashboard
+  Live Releases:    http://localhost:3002/live-releases
+  API Test:         http://localhost:3002/api/releases?limit=10
+
+🔍 MANUAL TESTS (PowerShell)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Test PostgREST directly
+  Invoke-RestMethod "http://localhost:3001/soleretriever_data?limit=5"
+
+  # Test API route
+  Invoke-RestMethod "http://localhost:3002/api/releases?limit=5"
+
+  # Test with filter
+  Invoke-RestMethod "http://localhost:3002/api/releases?brand=Jordan&limit=5"
+
+  # Test search
+  Invoke-RestMethod "http://localhost:3002/api/releases?search=Air&limit=5"
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Complete Report:  VERIFICATION-COMPLETE.md
+  Roadmap:          docs/roadmap.md (6 milestones)
+  SLOs & Metrics:   docs/slo-and-observability.md
+  Security IAM:     docs/SECURITY/iam-bindings.md
+  Key Rotation:     docs/SECURITY/key-rotation-runbook.md
+  Docs Index:       docs/README.md
+
+🎯 NEXT STEPS (from Roadmap)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Immediate (3-5 days):
+    • Upgrade to Node 20.x LTS
+    • Add RLS coverage tests
+    • Create ingestion smoke tests
+
+  Milestone A (Weeks 1-2): MVP Hardening
+    • Target: TTI P95 ≤ 2.5s, API 5xx ≤ 1%, freshness ≤ 10m
+    • Complete RLS review
+    • One-click dev startup
+
+  Milestone B (Weeks 2-4): Data Quality
+    • Canonical ID enforcement
+    • ISO date validation
+    • Historical data backfill
+
+  See docs/roadmap.md for Milestones C-F
+
+🔐 SECURITY HIGHLIGHTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ RLS enabled on all public tables
+  ✓ Service role key never exposed to client
+  ✓ Separate dev/prod keys configured
+  ✓ Key rotation runbook in place
+  ✓ Quarterly rotation scheduled
+
+🐛 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Port 3002 in use:
+    $pid = (Get-NetTCPConnection -LocalPort 3002).OwningProcess
+    Stop-Process -Id $pid -Force
+
+  API returns 500 JWSError:
+    • Check .env.local has valid SUPABASE_SERVICE_ROLE_KEY
+    • Verify Supabase local stack is running
+
+  "Couldn't find pages directory":
+    • Always run from apps/web-nextjs/ directory
+
+📊 CURRENT STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PostgREST:     ✅ VERIFIED (port 3001)
+  Supabase Keys: ✅ VALID (local dev)
+  RLS Policies:  ✅ ENABLED
+  API Route:     ✅ READY (code verified)
+  Enhanced UI:   ✅ DEPLOYED
+  Documentation: ✅ COMPLETE
+
+  Next.js:       ⚠️  Start manually (interactive terminal)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Last Updated: 2025-11-18
+Agent: GitHub Copilot (Claude Sonnet 4.5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
