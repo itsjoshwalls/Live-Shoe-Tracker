@@ -1,0 +1,27 @@
+groups:
+  - name: sneaker-tracker-api
+    rules:
+      - alert: ApiHighErrorRate
+        expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate (>5%)"
+          description: "5xx error ratio exceeded threshold for 10m"
+      - alert: ApiLatencyP95High
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 latency > 1.5s"
+          description: "API 95th percentile latency above 1.5 seconds"
+      - alert: ApiReadinessFailing
+        expr: probe_success{job="blackbox-api"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Readiness endpoint failing"
+          description: "Health readiness probe returning failure for 5 minutes"

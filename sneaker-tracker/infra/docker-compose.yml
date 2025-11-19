@@ -104,9 +104,64 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Prometheus for metrics collection (local only)
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/rules/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - '9090:9090'
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
+  # Blackbox exporter to probe API endpoints
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    ports:
+      - '9115:9115'
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
+  # (Optional) VictoriaMetrics single-node time-series storage
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.103.0
+    ports:
+      - '8428:8428'
+    volumes:
+      - vm_data:/victoria-metrics-data
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
+  # (Optional) Grafana for dashboarding
+  grafana:
+    image: grafana/grafana:10.4.5
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - shoe-tracker-network
+
 networks:
   shoe-tracker-network:
     driver: bridge
+
+volumes:
+  prometheus_data:
+  vm_data:
+  grafana_data:
 
 # volumes:
 #   postgres_data:
