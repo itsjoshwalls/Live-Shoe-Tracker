@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
-import { getFirestoreInstance } from '../lib/firebaseClient';
+import { Timestamp } from 'firebase/firestore';
+import { fetchReleases } from '../lib/api';
 import Header from '../components/Header';
 import styles from '../styles/Dashboard.module.css';
 
@@ -33,38 +33,24 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const db = getFirestoreInstance();
-      const releasesRef = collection(db, 'sneakers_canonical');
-      const q = query(releasesRef, orderBy('scraped_at', 'desc'));
-      
-      // Real-time subscription
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const releasesData: Release[] = [];
-          snapshot.forEach((doc) => {
-            releasesData.push({
-              id: doc.id,
-              ...(doc.data() as Omit<Release, 'id'>)
-            });
-          });
-          setReleases(releasesData);
-          setLoading(false);
-        },
-        (err) => {
-          console.error('Error fetching releases:', err);
-          setError(err.message);
-          setLoading(false);
-        }
-      );
+    const loadReleases = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchReleases();
+        setReleases(data as Release[]);
+        setLoading(false);
+      } catch (err: any) {
+        console.error('API error:', err);
+        setError(err.message || 'Failed to fetch releases from API');
+        setLoading(false);
+      }
+    };
 
-      return () => unsubscribe();
-    } catch (err: any) {
-      console.error('Firebase initialization error:', err);
-      setError(err.message);
-      setLoading(false);
-    }
+    loadReleases();
+    
+    // Poll every 30 seconds for updates
+    const interval = setInterval(loadReleases, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
@@ -83,7 +69,7 @@ const Dashboard = () => {
         <div className={styles.error}>
           Error: {error}
           <br />
-          <small>Make sure NEXT_PUBLIC_FIREBASE_CONFIG is set in your environment</small>
+          <small>Make sure NEXT_PUBLIC_API_URL is set and the API is accessible</small>
         </div>
       </div>
     );

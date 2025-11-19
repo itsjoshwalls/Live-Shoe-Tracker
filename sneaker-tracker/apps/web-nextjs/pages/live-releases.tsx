@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore';
-import { getFirestoreInstance } from '../lib/firebaseClient';
+import { Timestamp } from 'firebase/firestore';
+import { fetchReleases } from '../lib/api';
 import Header from '../components/Header';
 import styles from '../styles/Dashboard.module.css';
 
@@ -28,43 +28,27 @@ const LiveReleases = () => {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
-    try {
-      const db = getFirestoreInstance();
-      const sneakersRef = collection(db, 'sneakers_canonical');
-      const q = query(
-        sneakersRef, 
-        orderBy('scraped_at', 'desc'),
-        limit(50)
-      );
-      
-      // Real-time subscription
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const releasesData: SneakerRelease[] = [];
-          snapshot.forEach((doc) => {
-            releasesData.push({
-              id: doc.id,
-              ...(doc.data() as Omit<SneakerRelease, 'id'>)
-            });
-          });
-          setReleases(releasesData);
-          setLastUpdate(new Date());
-          setLoading(false);
-        },
-        (err) => {
-          console.error('Error fetching sneakers:', err);
-          setError(err.message);
-          setLoading(false);
-        }
-      );
+    const loadReleases = async () => {
+      try {
+        const data = await fetchReleases();
+        setReleases(data.slice(0, 50) as SneakerRelease[]);
+        setLastUpdate(new Date());
+        setLoading(false);
+      } catch (err: any) {
+        console.error('API error:', err);
+        setError(err.message || 'Failed to fetch releases from API');
+        setLoading(false);
+      }
+    };
 
-      return () => unsubscribe();
-    } catch (err: any) {
-      console.error('Firebase initialization error:', err);
-      setError(err.message);
-      setLoading(false);
-    }
+    loadReleases();
+    
+    // Poll every 10 seconds for live updates
+    const interval = setInterval(() => {
+      loadReleases();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const formatTimestamp = (timestamp: string | Timestamp | undefined) => {
