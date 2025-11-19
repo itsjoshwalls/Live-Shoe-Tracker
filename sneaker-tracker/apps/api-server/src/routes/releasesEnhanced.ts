@@ -68,7 +68,7 @@ router.post('/batch', async (req, res) => {
   try {
     const releases = await batchCreateReleases(req.body);
     res.status(201).json(releases);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof ValidationError) {
       res.status(400).json({ error: 'Validation failed', details: error.errors });
     } else {

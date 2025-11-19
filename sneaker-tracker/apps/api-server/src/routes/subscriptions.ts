@@ -15,12 +15,12 @@ async function verifyAuth(req: Request, res: Response, next: NextFunction) {
   }
   const token = authHeader.substring(7);
   
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) {
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
     return res.status(401).json({ error: 'Invalid token' });
   }
   
-  (req as any).user = user; // Attach user to request
+  (req as any).user = data.user; // Attach user to request
   next();
 }
 
