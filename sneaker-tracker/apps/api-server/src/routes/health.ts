@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { supabase } from '../lib/db';
 const router = Router();
 
 router.get('/', (req, res) => {
@@ -27,6 +28,26 @@ router.get('/details', (req, res) => {
     uptimeSeconds: Math.floor(process.uptime()),
     env
   });
+});
+
+// Readiness probe: verifies Supabase connectivity with a lightweight select
+router.get('/ready', async (req, res) => {
+  try {
+    const { error } = await supabase.from('releases').select('id').limit(1);
+    if (error) throw error;
+    res.json({
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: Math.floor(process.uptime())
+    });
+  } catch (e) {
+    res.status(503).json({
+      status: 'degraded',
+      error: 'supabase_unavailable',
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: Math.floor(process.uptime())
+    });
+  }
 });
 
 export default router;
