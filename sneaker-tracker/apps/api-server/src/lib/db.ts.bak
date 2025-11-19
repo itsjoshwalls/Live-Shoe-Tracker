@@ -1,0 +1,178 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { z } from 'zod';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Zod schemas for validation
+export const ReleaseSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, 'Name is required'),
+  sku: z.string().optional(),
+  date: z.string().datetime().optional(),
+  status: z.enum(['upcoming', 'released', 'delayed', 'cancelled']).optional(),
+  price: z.number().positive().optional(),
+  currency: z.string().length(3).optional(), // ISO currency code
+  retailPrice: z.number().positive().optional(),
+  resellPrice: z.number().positive().optional(),
+  images: z.array(z.string().url()).optional(),
+  colorway: z.string().optional(),
+  brand: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const RetailerSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, 'Name is required'),
+  region: z.string().optional(),
+  website: z.string().url().optional(),
+  type: z.enum(['online', 'physical', 'hybrid']).optional(),
+  active: z.boolean().optional(),
+  locations: z.array(
+    z.object({
+      address: z.string(),
+      city: z.string(),
+      country: z.string(),
+      coordinates: z.tuple([z.number(), z.number()]).optional(),
+    })
+  ).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+// Infer TypeScript types from Zod schemas
+export type Release = z.infer<typeof ReleaseSchema>;
+export type Retailer = z.infer<typeof RetailerSchema>;
+
+// Database configuration
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY)');
+}
+
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+
+// Error handling helper
+class DatabaseError extends Error {
+  constructor(message: string, public originalError?: any) {
+    super(message);
+    this.name = 'DatabaseError';
+  }
+}
+
+// Releases
+export async function getReleases(): Promise<Release[]> {
+  try {
+    const { data, error } = await supabase.from<Release>('releases').select('*');
+    if (error) throw new DatabaseError('Failed to fetch releases', error);
+    return data?.map(release => ReleaseSchema.parse(release)) || [];
+  } catch (error) {
+    throw new DatabaseError('Error processing releases', error);
+  }
+}
+
+export async function createRelease(payload: Omit<Release, 'id'>): Promise<Release> {
+  try {
+    const validatedPayload = ReleaseSchema.omit({ id: true }).parse(payload);
+    const { data, error } = await supabase
+      .from('releases')
+      .insert(validatedPayload)
+      .select()
+      .limit(1);
+    
+    if (error) throw new DatabaseError('Failed to create release', error);
+    if (!data?.length) throw new DatabaseError('No release returned after creation');
+    
+    return ReleaseSchema.parse(data[0]);
+  } catch (error) {
+    throw new DatabaseError('Error creating release', error);
+  }
+}
+
+export async function updateRelease(id: string, payload: Partial<Release>): Promise<Release> {
+  try {
+    const validatedPayload = ReleaseSchema.partial().parse(payload);
+    const { data, error } = await supabase
+      .from('releases')
+      .update(validatedPayload)
+      .eq('id', id)
+      .select()
+      .limit(1);
+    
+    if (error) throw new DatabaseError('Failed to update release', error);
+    if (!data?.length) throw new DatabaseError(`No release found with id: ${id}`);
+    
+    return ReleaseSchema.parse(data[0]);
+  } catch (error) {
+    throw new DatabaseError('Error updating release', error);
+  }
+}
+
+export async function deleteRelease(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('releases').delete().eq('id', id);
+    if (error) throw new DatabaseError('Failed to delete release', error);
+    return true;
+  } catch (error) {
+    throw new DatabaseError('Error deleting release', error);
+  }
+}
+
+// Retailers
+export async function getRetailers(): Promise<Retailer[]> {
+  try {
+    const { data, error } = await supabase.from('retailers').select('*');
+    if (error) throw new DatabaseError('Failed to fetch retailers', error);
+    return data?.map(retailer => RetailerSchema.parse(retailer)) || [];
+  } catch (error) {
+    throw new DatabaseError('Error processing retailers', error);
+  }
+}
+
+export async function createRetailer(payload: Omit<Retailer, 'id'>): Promise<Retailer> {
+  try {
+    const validatedPayload = RetailerSchema.omit({ id: true }).parse(payload);
+    const { data, error } = await supabase
+      .from('retailers')
+      .insert(validatedPayload)
+      .select()
+      .limit(1);
+    
+    if (error) throw new DatabaseError('Failed to create retailer', error);
+    if (!data?.length) throw new DatabaseError('No retailer returned after creation');
+    
+    return RetailerSchema.parse(data[0]);
+  } catch (error) {
+    throw new DatabaseError('Error creating retailer', error);
+  }
+}
+
+export async function updateRetailer(id: string, payload: Partial<Retailer>): Promise<Retailer> {
+  try {
+    const validatedPayload = RetailerSchema.partial().parse(payload);
+    const { data, error } = await supabase
+      .from('retailers')
+      .update(validatedPayload)
+      .eq('id', id)
+      .select()
+      .limit(1);
+    
+    if (error) throw new DatabaseError('Failed to update retailer', error);
+    if (!data?.length) throw new DatabaseError(`No retailer found with id: ${id}`);
+    
+    return RetailerSchema.parse(data[0]);
+  } catch (error) {
+    throw new DatabaseError('Error updating retailer', error);
+  }
+}
+
+export async function deleteRetailer(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('retailers').delete().eq('id', id);
+    if (error) throw new DatabaseError('Failed to delete retailer', error);
+    return true;
+  } catch (error) {
+    throw new DatabaseError('Error deleting retailer', error);
+  }
+}
