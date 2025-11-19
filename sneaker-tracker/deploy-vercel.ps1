@@ -103,3 +103,12 @@ Write-Host "Useful Commands:" -ForegroundColor Yellow
 Write-Host "  vercel logs <deployment-url>    # View logs" -ForegroundColor Gray
 Write-Host "  vercel inspect <deployment-url> # Inspect deployment" -ForegroundColor Gray
 Write-Host "  vercel env ls                   # List environment variables`n" -ForegroundColor Gray
+
+Write-Host "Environment Variable Setup (API project):" -ForegroundColor Yellow
+Write-Host "  vercel env add SUPABASE_URL production" -ForegroundColor Gray
+Write-Host "  vercel env add SUPABASE_SERVICE_ROLE_KEY production" -ForegroundColor Gray
+Write-Host "  vercel env add SUPABASE_ANON_KEY production" -ForegroundColor Gray
+Write-Host "(Use --env or add preview variants as needed)" -ForegroundColor Gray
+
+Write-Host "Quick Env Verification (local):" -ForegroundColor Yellow
+Write-Host "  pwsh apps/api-server/scripts/verify-env.ps1" -ForegroundColor Gray
