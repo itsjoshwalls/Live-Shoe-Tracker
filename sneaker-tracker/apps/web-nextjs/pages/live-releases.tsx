@@ -22,7 +22,7 @@ interface SneakerRelease {
   metadata?: Record<string, any>;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 const LiveReleases = () => {
   const [releases, setReleases] = useState<SneakerRelease[]>([]);

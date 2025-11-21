@@ -6,20 +6,23 @@
     "dev": "next dev",
     "dev:all": "concurrently \"pnpm --filter ./apps/web-nextjs run dev\" \"pnpm --filter ./apps/api-server run dev\"",
     "build": "next build",
+    "build:api": "pnpm --filter ./apps/api-server run build",
+    "build:web": "pnpm --filter ./apps/web-nextjs run build",
+    "build:all": "concurrently --kill-others-on-fail \"pnpm:build:api\" \"pnpm:build:web\"",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "@supabase/supabase-js": "^2.38.4",
+    "next": "^14.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.48",
     "concurrently": "^8.0.0",
     "cross-env": "^10.1.0",
-    "typescript": "latest"
+    "typescript": "^5.2.2"
   }
 }

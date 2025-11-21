@@ -2,7 +2,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "pnpm install",
   "devCommand": "npm run dev",
   
   "headers": [
@@ -34,12 +34,6 @@
           "value": "origin-when-cross-origin"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://sneaker-tracker-api.vercel.app/api/:path*"
     }
   ],
   "regions": ["iad1"],
