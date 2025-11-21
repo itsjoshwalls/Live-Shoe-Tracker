@@ -1,6 +1,6 @@
 # 🚀 Live Shoe Tracker - Production Launch Checklist
 
-**Last Updated:** November 21, 2025  
+**Last Updated:** November 21, 2024  
 **Status:** Ready for launch after completing this checklist
 
 ---
@@ -117,7 +117,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
    - Root Directory: `apps/web-nextjs`
    - Build Command: `npm run build`
    - Output Directory: `.next`
-   - Install Command: `pnpm install --no-frozen-lockfile`
+   - Install Command: `npm install` (Vercel will use frozen lockfile by default)
 3. [ ] Add all frontend environment variables
 4. [ ] **Important:** Set `NEXT_PUBLIC_API_URL` to your API server URL from step 1
 5. [ ] Deploy and wait for completion
