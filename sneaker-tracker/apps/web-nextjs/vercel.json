@@ -36,12 +36,6 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://sneaker-tracker-api.vercel.app/api/:path*"
-    }
-  ],
   "regions": ["iad1"],
   "crons": []
 }
