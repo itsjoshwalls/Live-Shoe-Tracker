@@ -61,6 +61,8 @@ ui-debug.log
 .firebase/
 firebase-service-account*.json
 *-service-account.json
+.credentials-summary.txt
+.env.vercel
 
 # Next.js
 .next/

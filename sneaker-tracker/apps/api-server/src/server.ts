@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server as SocketServer } from 'socket.io';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
@@ -53,7 +55,26 @@ const timeoutOptions = {
 };
 
 const app = express();
+const httpServer = createServer(app);
+const io = new SocketServer(httpServer, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST'],
+  }
+});
 const PORT = process.env.PORT || 3000;
+
+// Socket.IO real-time connection handling
+io.on('connection', (socket) => {
+  logger.info(`Socket client connected: ${socket.id}`);
+  
+  socket.on('disconnect', () => {
+    logger.info(`Socket client disconnected: ${socket.id}`);
+  });
+});
+
+// Export io for use in other modules
+export { io };
 
 // Security and performance middleware
 app.use(helmet()); // Security headers
@@ -100,8 +121,9 @@ app.use(errorHandler);
 // Export app for tests. Only start server when invoked directly.
 if (require.main === module) {
   try {
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       logger.info(`API server is running on http://localhost:${PORT}`);
+      logger.info(`Socket.IO enabled for real-time updates`);
     });
   } catch (err) {
     logger.error({ msg: 'Server startup failed', error: (err as Error).message });

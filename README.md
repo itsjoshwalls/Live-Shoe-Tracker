@@ -1,341 +1,192 @@
-# 🚀 Live Shoe Tracker - Complete Backend Implementation
+# Live Shoe Tracker
 
-> **Production-ready Cloud Functions backend with Firestore, real-time alerts, and automated scraping**
-
-[![Firebase](https://img.shields.io/badge/Firebase-Cloud%20Functions-orange)](https://firebase.google.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-18-green)](https://nodejs.org/)
-[![Firestore](https://img.shields.io/badge/Firestore-Database-blue)](https://firebase.google.com/docs/firestore)
-
----
-
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Architecture](#-architecture)
-- [Documentation](#-documentation)
-- [Project Structure](#-project-structure)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-
----
-
-## ✨ Features
-
-### 🔥 Cloud Functions (7 Total)
-- **4 Firestore Triggers** - Auto-respond to database changes
-- **3 Scheduled Functions** - Automated scraping, alerts, and metrics
-
-### 🗄️ Firestore Database
-- **9 Collections** - Releases, retailers, users, alerts, queues, metrics, categories, regions
-- **4 Composite Indexes** - Optimized queries for performance
-- **Complete Security Rules** - User isolation and admin-only writes
-
-### 🔔 Real-time Notifications
-- **Discord Integration** - Instant alerts for stock changes
-- **Slack Integration** - Team notifications
-- **User Alerts** - Personalized notifications
-
-### 🕷️ Automated Scraping
-- **Queue System** - Managed job processing
-- **Scheduled Execution** - Every 30 minutes
-- **Retailer Management** - 5 pre-configured retailers
-
-### 📊 Monitoring & Metrics
-- **System Stats** - Releases, retailers, users
-- **Function Logs** - Comprehensive logging
-- **Performance Tracking** - Execution metrics
-
----
+**Real-time sneaker release tracking application with automated scraping, Socket.IO live updates, and beautiful UI.**
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+
-- Firebase CLI
-- Firebase project with Firestore enabled
-
-### 1. Automated Setup (Recommended)
-```powershell
-.\Setup-LocalDev.ps1
-```
-
-### 2. Manual Setup
 ```powershell
 # Install dependencies
-cd functions
+cd sneaker-tracker
+pnpm install
+
+# Start API server (port 4000)
+cd apps/api-server
+$env:PORT=4000
+npm run dev
+
+# Start web app (port 3002) - in new terminal
+cd ../web-nextjs
+$env:NEXT_PUBLIC_API_URL="http://localhost:4000"
+npm run dev
+
+# Visit: http://localhost:3002/live-releases
+```
+
+## 📦 Project Structure
+
+```
+sneaker-tracker/           # Main monorepo (USE THIS)
+├── apps/
+│   ├── api-server/       # Express + TypeScript + Socket.IO API
+│   ├── web-nextjs/       # Next.js 14 frontend
+│   └── desktop-electron/ # Electron desktop app
+├── packages/
+│   ├── scrapers/
+│   │   ├── python/       # Python scrapers (Nike, Footlocker, etc.)
+│   │   ├── shopify/      # Shopify store scraper
+│   │   └── playwright_monitor/ # JavaScript-heavy site scraper
+│   ├── supabase-migrations/ # Database schema
+│   └── firebase-functions/  # Cloud functions
+├── region-data/          # Regional retailer CSVs
+└── infra/               # Docker, Vercel configs
+
+shoe-tracker/             # Legacy prototype (being phased out)
+scripts/                  # Root-level helper scripts
+docs/                     # Documentation
+```
+
+## 🎯 Features
+
+- ✅ **Real-time Updates** - Socket.IO WebSocket connections
+- ✅ **Beautiful UI** - Next.js with responsive cards and live indicators
+- ✅ **Multiple Scrapers** - Python, Shopify, Playwright support
+- ✅ **PostgreSQL** - Supabase backend with migrations
+- ✅ **Production Ready** - Deployed on Vercel
+- ✅ **Type Safe** - Full TypeScript coverage
+
+## 🔧 Environment Variables
+
+### API Server (`apps/api-server/.env`)
+```bash
+PORT=4000
+SUPABASE_URL=https://npvqqzuofwojhbdlozgh.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### Web App (`apps/web-nextjs/.env.local`)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_SUPABASE_URL=https://npvqqzuofwojhbdlozgh.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+### Scrapers (`packages/scrapers/python/.env`)
+```bash
+SUPABASE_URL=https://npvqqzuofwojhbdlozgh.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+## 📡 Socket.IO Events
+
+The API server emits these real-time events:
+
+- `releases:updated` - Full release list update
+- `release:new` - Single new release added
+
+Frontend auto-subscribes and updates UI instantly.
+
+## 🗃️ Database Schema
+
+**Supabase PostgreSQL Tables:**
+
+- `releases` - Sneaker releases with images[], SKU, price, status
+- `retailers` - Store information (name, region, website)
+- `subscriptions` - User email alerts
+
+See: `packages/supabase-migrations/` for schema
+
+## 🕷️ Running Scrapers
+
+### Python Scrapers
+```powershell
+cd sneaker-tracker/packages/scrapers/python
+$env:SUPABASE_URL = "https://npvqqzuofwojhbdlozgh.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY = "your_key"
+python footlocker_scraper.py
+```
+
+### Shopify Scraper
+```powershell
+cd sneaker-tracker/packages/scrapers/shopify
+python shopify_scraper.py
+# Scrapes stores from shopify_stores.json
+```
+
+### Playwright Monitor
+```powershell
+cd sneaker-tracker/packages/scrapers/playwright_monitor
 npm install
-
-# Configure environment
-Copy-Item .env.example .env
-# Edit .env with your credentials
-
-# Download service account key from Firebase Console
-# Save as: functions/serviceAccountKey.json
-
-# Seed initial data
-npm run seed
-
-# Start emulators
-cd ..
-firebase emulators:start
+npm run monitor
+# Monitors JavaScript-heavy sites from targets.json
 ```
 
-### 3. Access
-- **Emulator UI**: http://localhost:4000
-- **Firestore**: http://localhost:8080
-- **Functions**: http://localhost:5001
+## 🚢 Deployment
 
----
-
-## 🏗️ Architecture
-
-```
-┌──────────────┐
-│   Scrapers   │
-└──────┬───────┘
-       │
-       ▼
-┌─────────────────────────────┐
-│    Cloud Functions          │
-│  • releaseHandler           │
-│  • retailerHandler          │
-│  • stockHandler             │
-│  • alertsHandler            │
-│  • scraperQueueHandler      │
-│  • schedulerHandler         │
-│  • metricsHandler           │
-└──────────┬──────────────────┘
-           │
-           ▼
-┌─────────────────────────────┐
-│    Firestore Database       │
-│  • releases                 │
-│  • retailers                │
-│  • users                    │
-│  • alerts                   │
-│  • queues                   │
-│  • metrics                  │
-│  • categories               │
-│  • regions                  │
-└──────────┬──────────────────┘
-           │
-           ▼
-┌─────────────────────────────┐
-│    Notifications            │
-│  • Discord Webhooks         │
-│  • Slack Webhooks           │
-└─────────────────────────────┘
+### API Server
+```powershell
+cd sneaker-tracker/apps/api-server
+vercel --prod
 ```
 
-See **[ARCHITECTURE.md](./ARCHITECTURE.md)** for detailed diagrams.
+### Web App
+```powershell
+cd sneaker-tracker/apps/web-nextjs
+vercel --prod
+```
 
----
+Environment variables must be set in Vercel dashboard.
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| **[SETUP-GUIDE.md](./SETUP-GUIDE.md)** | Comprehensive setup instructions |
-| **[QUICK-START.md](./QUICK-START.md)** | Quick reference for common tasks |
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | System architecture diagrams |
-| **[DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)** | Production deployment guide |
-| **[IMPLEMENTATION-COMPLETE.md](./IMPLEMENTATION-COMPLETE.md)** | Implementation summary |
+- `SOCKET-IO-SETUP-COMPLETE.md` - Socket.IO integration guide
+- `ARCHITECTURE.md` - System architecture overview
+- `sneaker-tracker/DEPLOYMENT-GUIDE.md` - Full deployment steps
+- `.github/copilot-instructions.md` - AI agent quick reference
 
----
+## 🔗 Live URLs
 
-## 📁 Project Structure
-
-```
-/Live-Shoe-Tracker
-│
-├── functions/
-│   ├── src/
-│   │   ├── handlers/          # 8 Cloud Function handlers
-│   │   ├── utils/             # Firestore, logger, notifications
-│   │   └── index.js           # Main exports
-│   ├── .env.example           # Environment template
-│   └── package.json           # Dependencies & scripts
-│
-├── firestore.indexes.json     # Composite indexes
-├── firestore.seed.json        # Initial seed data
-├── firestore.rules            # Security rules
-├── firebase.json              # Emulator configuration
-│
-├── Setup-LocalDev.ps1         # Automated setup script
-│
-└── docs/                      # Documentation
-    ├── SETUP-GUIDE.md
-    ├── QUICK-START.md
-    ├── ARCHITECTURE.md
-    ├── DEPLOYMENT-CHECKLIST.md
-    └── IMPLEMENTATION-COMPLETE.md
-```
-
----
-
-## 🚀 Deployment
-
-### Deploy Everything
-```powershell
-firebase deploy
-```
-
-### Deploy Specific Components
-```powershell
-# Firestore rules
-firebase deploy --only firestore:rules
-
-# Firestore indexes
-firebase deploy --only firestore:indexes
-
-# Cloud Functions
-firebase deploy --only functions
-```
-
-### Set Environment Variables
-```powershell
-# Discord webhook
-firebase functions:config:set alerts.discord_webhook="YOUR_WEBHOOK_URL"
-
-# Slack webhook
-firebase functions:config:set alerts.slack_webhook="YOUR_WEBHOOK_URL"
-
-# Apply changes
-firebase deploy --only functions
-```
-
-See **[DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)** for complete guide.
-
----
-
-## 🔐 Security
-
-### Firestore Rules
-- **User data isolation** - Users can only access their own data
-- **Admin-only writes** - Public collections require admin role
-- **Subcollection security** - Inherited from parent documents
-
-### Environment Variables
-- **Never commit** `.env` or `serviceAccountKey.json`
-- **Use Firebase secrets** for production credentials
-- **Rotate keys regularly**
-
-### Admin Access
-Set custom claims for admin users:
-```javascript
-admin.auth().setCustomUserClaims(uid, { admin: true });
-```
-
----
-
-## 📊 Monitoring
-
-### View Logs
-```powershell
-# All function logs
-firebase functions:log
-
-# Specific function
-firebase functions:log --only onReleaseWrite
-
-# Follow in real-time
-firebase functions:log --follow
-```
-
-### Metrics Endpoint
-System metrics collected hourly:
-- Total releases
-- Total retailers
-- Total users
-
----
+- **Production API**: https://api-server-git-main-joshua-walls-projects.vercel.app
+- **Production Web**: (Deploy from apps/web-nextjs)
+- **Local Dev**: http://localhost:3002/live-releases
 
 ## 🛠️ Development
 
-### Run Emulators
+### Install All Dependencies
 ```powershell
-firebase emulators:start
+npm run install
 ```
 
-### Seed Data
+### Start API + Web
 ```powershell
-npm run seed --prefix functions
+# Terminal 1 - API
+cd sneaker-tracker/apps/api-server
+$env:PORT=4000
+npm run dev
+
+# Terminal 2 - Web
+cd sneaker-tracker/apps/web-nextjs
+$env:NEXT_PUBLIC_API_URL="http://localhost:4000"
+npm run dev
 ```
 
-### Run Tests
+### Run Database Migrations
 ```powershell
-# Coming soon
-npm test --prefix functions
+cd sneaker-tracker/packages/supabase-migrations
+pnpm run migrate
 ```
 
----
+## 📄 License
 
-## 🐛 Troubleshooting
-
-### Emulators won't start
-```powershell
-Get-Process -Name "java" | Stop-Process -Force
-firebase emulators:start
-```
-
-### Functions not deploying
-- Check billing is enabled
-- Verify Firebase project: `firebase use default`
-- Check `package.json` syntax
-
-### Permission denied errors
-- Review `firestore.rules`
-- Verify user authentication
-- Check admin custom claims
-
-See **[SETUP-GUIDE.md](./SETUP-GUIDE.md)** for more solutions.
-
----
+MIT License - See LICENSE file
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
-
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open Pull Request
 
 ---
 
-## 📝 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🙏 Acknowledgments
-
-- Firebase Team for Cloud Functions and Firestore
-- Open source community for inspiration
-
----
-
-## 📞 Support
-
-- **Documentation**: See `/docs` folder
-- **Issues**: Open a GitHub issue
-- **Firebase Docs**: https://firebase.google.com/docs
-
----
-
-## 🎯 Next Steps
-
-1. ✅ Review **[SETUP-GUIDE.md](./SETUP-GUIDE.md)**
-2. ✅ Run `.\Setup-LocalDev.ps1`
-3. ✅ Start emulators
-4. ✅ Test functions in Emulator UI
-5. ✅ Deploy to production
-
----
-
-**Built with ❤️ using Firebase Cloud Functions**
-
-Last Updated: November 8, 2025
+**Built with ❤️ for sneakerheads worldwide**

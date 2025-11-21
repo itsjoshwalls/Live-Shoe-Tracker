@@ -44,6 +44,8 @@ router.get('/ready', async (req, res) => {
     res.status(503).json({
       status: 'degraded',
       error: 'supabase_unavailable',
+      message: (e as Error).message,
+      details: (e as any).details || (e as any).hint,
       timestamp: new Date().toISOString(),
       uptimeSeconds: Math.floor(process.uptime())
     });

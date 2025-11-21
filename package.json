@@ -1,22 +1,24 @@
 {
   "name": "live-shoe-tracker-root",
   "private": true,
-  "version": "0.0.0",
-  "description": "Root helper package.json with workspace installer scripts for a multi-project repo.",
+  "version": "1.0.0",
+  "description": "Live Shoe Tracker - Unified monorepo for sneaker release tracking",
   "scripts": {
-    "install:all": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\\install-all.ps1",
-    "install:shoe-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location shoe-tracker; npm install\"",
-    "install:live-shoe-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location live-shoe-tracker; npm install\"",
-    "install:sneaker-tracker": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location sneaker-tracker; if (Get-Command pnpm -ErrorAction SilentlyContinue) { pnpm install } else { npm install }\"",
+    "install": "cd sneaker-tracker && pnpm install",
+    "dev:api": "cd sneaker-tracker/apps/api-server && npm run dev",
+    "dev:web": "cd sneaker-tracker/apps/web-nextjs && npm run dev",
     "dev:all": "docker-compose -f sneaker-tracker/infra/docker-compose.yml up --build",
-    "down:all": "docker-compose -f sneaker-tracker/infra/docker-compose.yml down",
-    "scrapers:monitor": "pnpm -C sneaker-tracker/packages/scrapers run monitor",
-    "start:everything": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/start-everything.ps1"
+    "build:api": "cd sneaker-tracker/apps/api-server && npm run build",
+    "build:web": "cd sneaker-tracker/apps/web-nextjs && npm run build",
+    "scrapers:monitor": "pnpm -C sneaker-tracker/packages/scrapers/playwright_monitor run monitor",
+    "migrate": "cd sneaker-tracker/packages/supabase-migrations && pnpm run migrate"
   },
   "engines": {
-    "node": ">=18 <25"
+    "node": ">=18 <26",
+    "pnpm": ">=8"
   },
-  "dependencies": {
-    "firebase": "^12.5.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itsjoshwalls/Live-Shoe-Tracker"
   }
 }

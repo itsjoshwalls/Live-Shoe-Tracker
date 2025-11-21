@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getReleases, createRelease, updateRelease, deleteRelease } from '../lib/db';
+import { getReleases, createRelease, updateRelease, deleteRelease, DatabaseError } from '../lib/db';
 import { ReleaseSchema, ReleaseUpdateSchema } from '../schemas/release.schema';
 import { redisCacheMiddleware, clearCache } from '../middleware/redisCache';
 import { ZodError } from 'zod';
@@ -13,7 +13,18 @@ router.get('/', redisCacheMiddleware(CACHE_PREFIX, 300), async (req, res) => {
         const releases = await getReleases();
         res.json(releases);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch releases' });
+        if (error instanceof DatabaseError) {
+            res.status(500).json({ 
+                error: 'Failed to fetch releases',
+                message: error.message,
+                details: error.originalError?.message || error.originalError
+            });
+        } else {
+            res.status(500).json({ 
+                error: 'Failed to fetch releases',
+                message: (error as Error).message 
+            });
+        }
     }
 });
 
@@ -31,7 +42,10 @@ router.post('/', async (req, res) => {
                 details: error.format()
             });
         } else {
-            res.status(400).json({ error: 'Failed to create release' });
+            res.status(400).json({ 
+                error: 'Failed to create release',
+                message: error instanceof Error ? error.message : String(error)
+            });
         }
     }
 });
@@ -50,7 +64,10 @@ router.put('/:id', async (req, res) => {
                 details: error.format()
             });
         } else {
-            res.status(400).json({ error: 'Failed to update release' });
+            res.status(400).json({ 
+                error: 'Failed to update release',
+                message: error instanceof Error ? error.message : String(error)
+            });
         }
     }
 });
@@ -62,7 +79,10 @@ router.delete('/:id', async (req, res) => {
         await clearCache(CACHE_PREFIX);
         res.status(204).send();
     } catch (error) {
-        res.status(400).json({ error: 'Failed to delete release' });
+        res.status(400).json({ 
+            error: 'Failed to delete release',
+            message: error instanceof Error ? error.message : String(error)
+        });
     }
 });
 

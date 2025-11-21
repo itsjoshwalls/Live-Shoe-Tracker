@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import NodeCache from 'node-cache';
-import { Release, ReleaseSchema, Retailer, RetailerSchema, DatabaseError, supabase } from './db';
+import { Release, ReleaseSchema, Retailer, RetailerSchema, DatabaseError, supabase, normalizeRawRelease } from './db';
 
 // Initialize cache
 const cache = new NodeCache({ stdTTL: 300 }); // 5 minutes default TTL
@@ -159,7 +159,7 @@ export async function getReleasesByQuery(options: QueryOptions): Promise<{ data:
     if (error) throw new DatabaseError('Failed to fetch releases', error);
     
     return {
-      data: (data || []).map(release => ReleaseSchema.parse(release)),
+      data: (data || []).map(normalizeRawRelease),
       count: count ?? undefined
     };
   } catch (error) {
@@ -213,8 +213,8 @@ export function subscribeToReleases(
           }
           
           // Parse records through schema
-          const oldRecord = payload.old ? ReleaseSchema.parse(payload.old) : undefined;
-          const newRecord = payload.new ? ReleaseSchema.parse(payload.new) : undefined;
+          const oldRecord = payload.old ? normalizeRawRelease(payload.old) : undefined;
+          const newRecord = payload.new ? normalizeRawRelease(payload.new) : undefined;
           
           // Call appropriate callback
           switch (payload.eventType) {
@@ -381,7 +381,7 @@ export async function batchCreateReleases(
         if (error) throw error;
 
         // Process successful items
-        const processed = (data || []).map(release => ReleaseSchema.parse(release));
+        const processed = (data || []).map(normalizeRawRelease);
         result.success.push(...processed);
         result.stats.succeeded += processed.length;
 
@@ -464,7 +464,7 @@ export async function searchReleases(query: string): Promise<Release[]> {
       .or(`name.ilike.%${query}%, sku.ilike.%${query}%`);
     
     if (error) throw new DatabaseError('Failed to search releases', error);
-    return (data || []).map(release => ReleaseSchema.parse(release));
+    return (data || []).map(normalizeRawRelease);
   }
   catch (error) {
     throw new DatabaseError('Error searching releases', error);
@@ -604,7 +604,7 @@ export async function getCachedReleases(
   }
   
   const releases = ('data' in query && query.data)
-    ? query.data.map(release => ReleaseSchema.parse(release))
+    ? query.data.map(normalizeRawRelease)
     : [];
   
   // Cache the results
@@ -624,7 +624,7 @@ export async function getCachedReleases(
 // Start background cache updaters
 startCacheUpdater(CACHE_CONFIGS.releases, async () => {
   const { data } = await supabase.from('releases').select('*');
-  return (data || []).map(release => ReleaseSchema.parse(release));
+  return (data || []).map(normalizeRawRelease);
 });
 
 // Batch Operations for Retailers

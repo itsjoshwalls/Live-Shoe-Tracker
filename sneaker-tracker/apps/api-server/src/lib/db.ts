@@ -1,3 +1,7 @@
+/*
+ *   Copyright (c) 2025 
+ *   All rights reserved.
+ */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import dotenv from 'dotenv';
@@ -27,20 +31,29 @@ const RetailerTypeEnum = z.enum(['online', 'physical', 'hybrid'] as const);
 
 // Release schema with rich validation
 export const ReleaseSchema = z.object({
-  id: z.string().optional(),
+  // Accept numeric IDs from existing rows and coerce to string
+  id: z.union([z.string(), z.number()]).transform(v => String(v)).optional(),
   name: z.string().min(1, 'Name is required').max(255),
   sku: z.string().optional(),
-  date: z.string().datetime().optional(),
+  // Accept broader ISO8601 datetime variants (RFC3339 with offsets) by relaxing validation
+  date: z.string().optional(),
   status: ReleaseStatusEnum.optional(),
   price: z.number().positive().optional(),
   currency: z.string().length(3, 'Currency must be a 3-letter ISO code').optional(),
   retailPrice: z.number().positive().optional(),
   resellPrice: z.number().positive().optional(),
-  images: z.array(z.string().url('Invalid image URL')).optional(),
+  // Allow null images from DB; normalize to []
+  images: z.array(z.string().url('Invalid image URL')).optional().nullable().transform(v => v ?? []),
   colorway: z.string().optional(),
-  brand: z.string().optional(),
+  brand: z.string().optional().nullable(),
   metadata: z.record(z.string(), z.unknown()).optional(),
-}).strict();
+  // Additional fields present in existing table rows
+  retailer: z.string().optional(),
+  url: z.string().url().optional(),
+  release_date: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional()
+}).passthrough();
 
 // Retailer schema with rich validation
 export const RetailerSchema = z.object({
@@ -119,7 +132,7 @@ export async function getReleases(): Promise<Release[]> {
       .from('releases')
       .select('*');
     if (error) throw new DatabaseError('Failed to fetch releases', error);
-    return (data || []).map(release => ReleaseSchema.parse(release));
+    return (data || []).map(normalizeRawRelease);
   } catch (error) {
     throw new DatabaseError('Error processing releases', error);
   }
@@ -136,7 +149,7 @@ export async function createRelease(payload: Omit<Release, 'id'>): Promise<Relea
       .limit(1);
     if (error) throw new DatabaseError('Failed to create release', error);
     if (!data?.length) return validatedPayload as Release;
-    return ReleaseSchema.parse(data[0]);
+    return normalizeRawRelease(data[0]);
   } catch (error) {
     throw new DatabaseError('Error creating release', error);
   }
@@ -154,7 +167,7 @@ export async function updateRelease(id: string, payload: Partial<Release>): Prom
       .limit(1);
     if (error) throw new DatabaseError('Failed to update release', error);
     if (!data?.length) return { id, ...validatedPayload } as Release;
-    return ReleaseSchema.parse(data[0]);
+    return normalizeRawRelease(data[0]);
   } catch (error) {
     throw new DatabaseError('Error updating release', error);
   }
@@ -186,6 +199,19 @@ export async function getRetailers(): Promise<Retailer[]> {
   } catch (error) {
     throw new DatabaseError('Error processing retailers', error);
   }
+}
+
+// Normalization helper to adapt legacy/alternative column names to schema expectations
+export function normalizeRawRelease(raw: any): Release {
+  if (!raw) return raw;
+  const mapped = {
+    ...raw,
+    // Prefer explicit date but fall back to legacy release_date
+    date: raw.date || raw.release_date || raw.releaseDate || raw.release_date?.split('T')[0],
+    // Ensure images is an array
+    images: Array.isArray(raw.images) ? raw.images : (raw.images === null || raw.images === undefined ? [] : [raw.images]).filter(Boolean)
+  };
+  return ReleaseSchema.parse(mapped);
 }
 
 export async function createRetailer(payload: Omit<Retailer, 'id'>): Promise<Retailer> {

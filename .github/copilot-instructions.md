@@ -1,86 +1,100 @@
 ## Live Shoe Tracker — Quick instructions for AI coding agents
 
-This file contains the concise, high-value facts an AI agent needs to be immediately productive across this multi-project workspace.
+This file contains the concise, high-value facts an AI agent needs to be immediately productive in this workspace.
 
-- Scope: this repo contains multiple related projects:
-  - `live-shoe-tracker/` (root frontend prototype),
-  - `shoe-tracker/` (React + Vite frontend + Python scrapers/workers), and
-  - `sneaker-tracker/` (monorepo with apps: `apps/web-nextjs`, `apps/api-server`, `apps/desktop-electron`, plus `packages/`).
+- **Scope**: This is a unified monorepo for the Live Shoe Tracker application
+  - Main project: `sneaker-tracker/` - Production monorepo containing:
+    - `apps/web-nextjs` - Next.js web application
+    - `apps/api-server` - Express + TypeScript API with Socket.IO
+    - `apps/desktop-electron` - Electron desktop app
+    - `packages/scrapers/` - All scraping tools (Python, Playwright, Shopify)
+    - `packages/firebase-functions/` - Cloud functions
+    - `packages/supabase-migrations/` - Database migrations
+  - Legacy: `shoe-tracker/` - Old prototype (to be phased out)
+  - Helper scripts: `scripts/` - Root-level utilities
 
-- Big-picture architecture:                                                                                                                                                                                                                
-  - Scrapers (Python under `shoe-tracker/scripts/` and `sneaker-tracker/packages/scrapers`) collect retailer data and write to Firestore/Supabase
-  - Ingestion workers (`scripts/ingest.py`, `orchestration_worker.py`) normalize/dedupe and write canonical records (defaults: `sneakers` -> `sneakers_canonical`)
-  - Frontend components:
-    - `shoe-tracker/`: React + Vite frontend reads Firestore canonical collections
-    - `sneaker-tracker/apps/web-nextjs`: Next.js web app with Supabase integration 
-    - `sneaker-tracker/apps/desktop-electron`: Electron app for offline-capable native experience
-    - `sneaker-tracker/apps/api-server`: TypeScript backend with Express serving both web/desktop apps
-    - Shared data shape: all frontends expect fields like `name`, `status`, `locations`, `mileage`
-  - Data storage:
-    - Firebase: Used by `shoe-tracker` prototype with collections like `sneakers`, `sneakers_canonical`
-    - Supabase: Main DB for monorepo apps, handling auth, real-time updates, SQL storage
+- **Big-picture architecture**:
+  - Scrapers collect retailer data and write to Supabase PostgreSQL
+    - Python scrapers: `packages/scrapers/python/` (Nike, Footlocker, JD Sports, etc.)
+    - Shopify scraper: `packages/scrapers/shopify/` with store list
+    - Playwright monitor: `packages/scrapers/playwright_monitor/` for JavaScript-heavy sites
+  - API Server (`apps/api-server`): Express + TypeScript + Socket.IO
+    - Serves REST endpoints (`/api/releases`, `/api/retailers`, etc.)
+    - Real-time updates via Socket.IO WebSocket
+    - Deployed on Vercel serverless
+  - Frontend (`apps/web-nextjs`): Next.js 14 with Supabase integration
+    - Real-time UI with Socket.IO client
+    - Deployed on Vercel
+  - Database: Supabase PostgreSQL
+    - Tables: `releases`, `retailers`, `subscriptions`
+    - Migrations: `packages/supabase-migrations/`
+    - Regional data: `region-data/[REGION]/*.csv`
 
-- Project-specific conventions (do not assume standard defaults):
-  - Environment variables contain JSON strings (not only scalar values):
-    - `VITE_FIREBASE_CONFIG_JSON` — stringified Firebase client config for `src/firebase.js`
-    - `FIREBASE_SERVICE_ACCOUNT` — stringified service account JSON for Python/Node scripts
-    - `ML_API_KEY`/`ML_API_URL` — optional ML service config for demand forecasting
-  - Collection/table naming conventions:
-    - Firebase: Python scripts use `--source`/`--dest` (defaults: `sneakers`/`sneakers_canonical`)
-    - Supabase: Migrations in `packages/supabase-migrations/`, regional data in `region-data/[REGION]/*.csv`
-  - Frontend assumptions:
-    - Firebase: `listenCollection()` uses `orderBy('name')`, expects specific fields
-    - Next.js: Pages under `apps/web-nextjs/pages/` follow standard routing
-    - All UIs may fail silently on missing env vars - verify configuration first
+- **Project-specific conventions**:
+  - Environment variables:
+    - `SUPABASE_URL` - Supabase project URL
+    - `SUPABASE_SERVICE_ROLE_KEY` - For scrapers/migrations (server-side only)
+    - `NEXT_PUBLIC_SUPABASE_URL` - Client-side Supabase URL
+    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Client-side public key
+    - `NEXT_PUBLIC_API_URL` - API server URL (http://localhost:4000 local, Vercel URL prod)
+  - Database schema:
+    - Tables use snake_case: `releases`, `retailers`, `subscriptions`
+    - Common fields: `id`, `name`, `sku`, `brand`, `price`, `status`, `date`, `images[]`
+    - Timestamps: `created_at`, `updated_at` (auto-managed)
+  - Socket.IO events:
+    - `releases:updated` - Broadcast full release list update
+    - `release:new` - Broadcast single new release
 
-- Developer workflows (PowerShell context):
-  - Firebase prototype (`shoe-tracker/`):
-    ```powershell
-    # Frontend setup
-    npm install
-    $env:VITE_FIREBASE_CONFIG_JSON = Get-Content 'C:\path\to\firebase-client-config.json' -Raw
-    $env:VITE_FIRESTORE_COLLECTION = 'sneakers'
-    npm run dev  # Dev server
-    npm run build && npm start  # Production preview (uses --strictPort)
+- **Developer workflows** (PowerShell):
+  ```powershell
+  # One-time setup
+  cd sneaker-tracker
+  pnpm install
 
-    # Scraping/ingestion
-    npx playwright install  # First time only
-    $env:FIREBASE_SERVICE_ACCOUNT = Get-Content 'C:\path\to\service-account.json' -Raw
-    npm run monitor  # Run Playwright scraper
-    python scripts/ingest.py --source sneakers --dest sneakers_canonical [--dry-run]
-    ```
-  - Monorepo (`sneaker-tracker/`):
-    ```powershell
-    pnpm install  # Install all workspace dependencies
-    
-    # Start core services
-    cd apps/web-nextjs && pnpm run dev  # Web UI on localhost:3000
-    cd ../api-server && pnpm run start  # API on localhost:4000
-    cd ../desktop-electron && pnpm run start  # Native app
-    
-    # Database operations
-    cd ../../packages/supabase-migrations
-    pnpm run migrate  # Run pending migrations
-    pnpm run seed  # Populate initial data
-    ```
+  # Start development servers
+  cd apps/api-server
+  $env:PORT=4000
+  npm run dev  # API + Socket.IO on :4000
 
-- Integration points & gotchas:
-  - Environment vars:
-    - Missing Firebase config = null client = empty UI with no error
-    - Service account must be full JSON string (CI injects directly)
-    - Next.js needs Supabase URL/key in `apps/web-nextjs/.env.local`
-  - Data validation:
-    - Ingestion expects ISO date strings - update parsers for new formats
-    - Document/row IDs use specific formats (e.g., `sku::ABC123`)
-    - Regional data must match CSV schemas in `region-data/`
+  cd ../web-nextjs
+  $env:NEXT_PUBLIC_API_URL="http://localhost:4000"
+  npm run dev  # Next.js on :3002
 
-- Key files for common changes:
-  - Frontend routes: `apps/web-nextjs/pages/*` (Next.js), `shoe-tracker/src/App.jsx` (Vite)
-  - API endpoints: `apps/api-server/src/routes/*` (Express)
-  - Data layer: 
-    - Firebase: `shoe-tracker/src/firebase.js`, `scripts/ingest.py`
-    - Supabase: `packages/supabase-migrations/migrations/*`
-  - Scraping: 
-    - Config: `scripts/shopify_stores.json`, `scripts/playwright_monitor/targets.json`
-    - Implementation: `packages/scrapers/*/` (monorepo), `scripts/*_scraper.py` (prototype)
-  - CI/Deploy: `.github/workflows/`, `infra/vercel.json`, `infra/docker-compose.yml`
+  # Run scrapers
+  cd ../../packages/scrapers/python
+  $env:SUPABASE_URL="https://npvqqzuofwojhbdlozgh.supabase.co"
+  $env:SUPABASE_SERVICE_ROLE_KEY="your-key"
+  python footlocker_scraper.py
+  
+  # Shopify scraper
+  cd ../shopify
+  python shopify_scraper.py
+  
+  # Playwright monitor
+  cd ../playwright_monitor
+  npm install
+  npm run monitor
+
+  # Database migrations
+  cd ../../packages/supabase-migrations
+  pnpm run migrate
+  ```
+
+- **Integration points & gotchas**:
+  - Socket.IO requires HTTP server wrapper (not plain Express `app.listen`)
+  - Images field is an array: `images: string[]` (first image = primary)
+  - Empty images show placeholder UI (👟 "No image available")
+  - All scrapers should write directly to Supabase (no Firebase intermediary)
+  - Regional data in `region-data/` is reference data, not live scraping targets
+  - Vercel deployments need environment variables set in dashboard
+
+- **Key files for common changes**:
+  - Frontend pages: `apps/web-nextjs/pages/*`
+  - API routes: `apps/api-server/src/routes/*`
+  - Socket.IO server: `apps/api-server/src/server.ts` (exports `io`)
+  - Database schema: `packages/supabase-migrations/migrations/*`
+  - Scraper configs: 
+    - Shopify stores: `packages/scrapers/shopify/shopify_stores.json`
+    - Playwright targets: `packages/scrapers/playwright_monitor/targets.json`
+  - Scraper implementations: `packages/scrapers/python/*_scraper.py`
+  - CI/CD: `.github/workflows/*`

@@ -1,31 +1,36 @@
 import { useEffect, useState } from 'react';
-import { Timestamp } from 'firebase/firestore';
+import { io, Socket } from 'socket.io-client';
 import { fetchReleases } from '../lib/api';
 import Header from '../components/Header';
 import styles from '../styles/Dashboard.module.css';
 
 interface SneakerRelease {
   id: string;
-  title?: string;
-  name?: string;
+  name: string;
   url?: string;
   brand?: string;
-  price?: string;
+  price?: number;
   sku?: string;
   status?: string;
-  release_date?: string | Timestamp;
-  image_url?: string;
-  source?: string;
-  scraped_at?: string | Timestamp;
-  created_at?: string | Timestamp;
-  updated_at?: string | Timestamp;
+  date?: string;
+  images?: string[];
+  colorway?: string;
+  retailPrice?: number;
+  resellPrice?: number;
+  created_at?: string;
+  updated_at?: string;
+  metadata?: Record<string, any>;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 const LiveReleases = () => {
   const [releases, setReleases] = useState<SneakerRelease[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const loadReleases = async () => {
@@ -43,21 +48,48 @@ const LiveReleases = () => {
 
     loadReleases();
     
-    // Poll every 10 seconds for live updates
-    const interval = setInterval(() => {
-      loadReleases();
-    }, 10000);
+    // Set up Socket.IO connection for real-time updates
+    const newSocket = io(API_URL, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
 
-    return () => clearInterval(interval);
+    newSocket.on('connect', () => {
+      console.log('Socket.IO connected');
+      setIsConnected(true);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+      setIsConnected(false);
+    });
+
+    // Listen for release updates from the server
+    newSocket.on('releases:updated', (updatedReleases: SneakerRelease[]) => {
+      console.log('Received real-time update:', updatedReleases.length, 'releases');
+      setReleases(updatedReleases.slice(0, 50));
+      setLastUpdate(new Date());
+    });
+
+    newSocket.on('release:new', (newRelease: SneakerRelease) => {
+      console.log('New release added:', newRelease.name);
+      setReleases(prev => [newRelease, ...prev].slice(0, 50));
+      setLastUpdate(new Date());
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
   }, []);
 
-  const formatTimestamp = (timestamp: string | Timestamp | undefined) => {
+  const formatTimestamp = (timestamp: string | undefined) => {
     if (!timestamp) return 'N/A';
     
     try {
-      if (timestamp instanceof Timestamp) {
-        return timestamp.toDate().toLocaleString();
-      }
       return new Date(timestamp).toLocaleString();
     } catch {
       return String(timestamp);
@@ -146,39 +178,52 @@ const LiveReleases = () => {
           </div>
           <div className={styles.statCard}>
             <div className={styles.statValue}>
-              {new Set(releases.map(r => r.source).filter(Boolean)).size}
-            </div>
-            <div className={styles.statLabel}>Sources</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>
               {releases.filter(r => r.status?.toLowerCase() === 'upcoming').length}
             </div>
             <div className={styles.statLabel}>Upcoming</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>
+              {isConnected ? '🟢 Live' : '🔴 Offline'}
+            </div>
+            <div className={styles.statLabel}>Socket Status</div>
           </div>
         </div>
 
         {releases.length === 0 ? (
           <div className={styles.empty}>
             <h2>No releases found</h2>
-            <p>Run a scraper to populate data:</p>
+            <p>The database is connected but empty. Run a scraper to populate data:</p>
             <pre className={styles.codeBlock}>
-              cd sneaker-tracker/packages/scrapers/python{'\n'}
-              python soleretriever_scraper_firebase.py --collection jordan --limit 10
+              # Set up Supabase credentials{'\n'}
+              $env:SUPABASE_URL = "https://npvqqzuofwojhbdlozgh.supabase.co"{'\n'}
+              $env:SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"{'\n'}
+              {'\n'}
+              # Run the image scraper{'\n'}
+              cd shoe-tracker{'\n'}
+              python scripts/supabase_image_scraper.py
             </pre>
           </div>
         ) : (
           <div className={styles.releasesGrid}>
             {releases.map((release) => {
-              const displayName = release.title || release.name || 'Unknown Product';
+              const displayName = release.name || 'Unknown Product';
               const statusClass = getStatusClass(release.status);
               const brandColor = getBrandColor(release.brand);
+              const primaryImage = release.images && release.images.length > 0 ? release.images[0] : null;
 
               return (
                 <div key={release.id} className={styles.card}>
-                  {release.image_url && (
+                  {primaryImage ? (
                     <div className={styles.cardImage}>
-                      <img src={release.image_url} alt={displayName} />
+                      <img src={primaryImage} alt={displayName} />
+                    </div>
+                  ) : (
+                    <div className={styles.cardImage}>
+                      <div className={styles.placeholderImage}>
+                        <span>👟</span>
+                        <p>No image available</p>
+                      </div>
                     </div>
                   )}
                   
@@ -186,10 +231,7 @@ const LiveReleases = () => {
                     <div>
                       <h2 className={styles.productName}>{displayName}</h2>
                       {release.brand && (
-                        <span 
-                          className={styles.brandBadge}
-                          style={{ backgroundColor: brandColor }}
-                        >
+                        <span className={`${styles.brandBadge} ${styles.brandBadge}--${release.brand.toLowerCase().replace(/\s+/g, '-')}`}>
                           {release.brand}
                         </span>
                       )}
@@ -204,7 +246,7 @@ const LiveReleases = () => {
                   <div className={styles.metaGrid}>
                     {release.price && (
                       <div>
-                        <strong>Price:</strong> {release.price}
+                        <strong>Price:</strong> ${release.price}
                       </div>
                     )}
                     {release.sku && (
@@ -212,21 +254,21 @@ const LiveReleases = () => {
                         <strong>SKU:</strong> {release.sku}
                       </div>
                     )}
-                    {release.release_date && (
+                    {release.date && (
                       <div>
-                        <strong>Release:</strong> {formatTimestamp(release.release_date)}
+                        <strong>Release:</strong> {formatTimestamp(release.date)}
                       </div>
                     )}
-                    {release.source && (
+                    {release.colorway && (
                       <div>
-                        <strong>Source:</strong> {release.source}
+                        <strong>Colorway:</strong> {release.colorway}
                       </div>
                     )}
                   </div>
 
                   <div className={styles.cardFooter}>
                     <small className={styles.timestamp}>
-                      Scraped: {formatTimestamp(release.scraped_at)}
+                      Updated: {formatTimestamp(release.updated_at)}
                     </small>
                     {release.url && (
                       <a 
@@ -334,6 +376,27 @@ const LiveReleases = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+
+        .${styles.placeholderImage} {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+          color: #999;
+        }
+
+        .${styles.placeholderImage} span {
+          font-size: 3rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .${styles.placeholderImage} p {
+          margin: 0;
+          font-size: 0.85rem;
         }
 
         .${styles.cardFooter} {
